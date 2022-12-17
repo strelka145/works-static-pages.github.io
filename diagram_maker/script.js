@@ -124,7 +124,6 @@ function drawFigure() {
   if((2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0])>widthMax){
     widthMax=(2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0]);
   }
-  console.log(texts[0].height);
   heightMax=heightMax+(texts[0].height+(margin[1]*2)+(padding[1]*2));
   d3.select('svg')
   .attr("width",widthMax)

@@ -1,0 +1,19 @@
+body {
+  font-family: 'Roboto Slab', serif;
+}
+a{
+  color:inherit;
+}
+br{
+  margin-bottom: 10px;
+}
+ul li{
+  margin-bottom: 30px;
+  overflow-wrap: normal;
+}
+
+#main{
+  width:60% !important;;
+  margin: auto !important;
+  max-width: 1000px !important;;
+}

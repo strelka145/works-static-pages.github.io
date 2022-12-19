@@ -2,9 +2,9 @@
 var fontsize=16;
 var padding=[10,5];
 var lineThickness=1;
-
-
 var margin=[20,20];
+
+
 var texts = [];
 var line_num=0;
 var widthMax=0;
@@ -18,6 +18,7 @@ function initialize(){
   heightMax=0;
   line_num=0;
   lineThickness=1;
+  margin=[20,20]
 }
 
 function sortElementsByArray(base_elem,elemArray){
@@ -42,6 +43,10 @@ function getChartStyle(codeLine){
     padding[1]=Number(codeLine.match(/(?<=#padding_y\s*=\s*)(\d+)/g)[0]);
   }else if(codeLine.match(/(?<=#linethick\s*=\s*)(\d+)/g)){
     lineThickness=Number(codeLine.match(/(?<=#linethick\s*=\s*)(\d+)/g)[0]);
+  }else if(codeLine.match(/(?<=#margin_x\s*=\s*)(\d+)/g)){
+    margin[0]=Number(codeLine.match(/(?<=#margin_x\s*=\s*)(\d+)/g)[0]);
+  }else if(codeLine.match(/(?<=#margin_y\s*=\s*)(\d+)/g)){
+    margin[1]=Number(codeLine.match(/(?<=#margin_y\s*=\s*)(\d+)/g)[0]);
   }
 }
 
@@ -49,6 +54,7 @@ function getTextOptions(textBlock) {
   var options={};
   options.text=textBlock.substr(1, textBlock.length - 2);
   options.write=options.text.match(/^(\s*[^\$\s&]+)+/g)[0].match(/(?<=\s*)\S.*/g)[0];
+  options.s_padding=options.text.match(/^\s*/g)[0].length;
   if(options.text.match(/[$][\w,#]+/g)){
     options.bgColor=options.text.match(/[$][\w,#]+/g)[0].substr(1, textBlock.length - 1);
   }else{
@@ -81,14 +87,16 @@ function drawFigure() {
       d.y = bbox.y;
     })
     .attr('name', 'text')
-    .attr('dx',padding[0])
+    .attr('dx',function(d){
+      return padding[0]+(d.s_padding*10/2);
+    })
     .attr('dy', function(d) {
         return -d.y+padding[1];
     });
   var rect = textsSelection.append('rect')
     .attr({
       width: function(d) {
-        return d.width+(padding[0]*2);
+        return d.width+(padding[0]*2)+(d.s_padding*10);
       },
       height: function(d) {
         return d.height+(padding[1]*2);
@@ -107,7 +115,7 @@ function drawFigure() {
   textsSelection.attr('transform', function(d, i) {
     translate_x = next_start;
     d.box_x=translate_x;
-    next_start = translate_x + d.width + (d.space*10)+(padding[0]*2);
+    next_start = translate_x + d.width + (d.space*10)+(padding[0]*2)+d.s_padding*10;
     d.box_xNext=next_start;
     return 'translate(' + (translate_x+margin[0]) + ','+(heightMax+margin[1])+')';
   });
@@ -121,8 +129,8 @@ function drawFigure() {
         name:'line'
       })
       .attr("stroke-width",lineThickness);
-  if((2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0])>widthMax){
-    widthMax=(2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0]);
+  if((2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0])+(texts[texts.length-1].s_padding*10)>widthMax){
+    widthMax=(2*margin[0])+texts[texts.length-1].box_x+texts[texts.length-1].width+(2*padding[0])+(texts[texts.length-1].s_padding*10);
   }
   heightMax=heightMax+(texts[0].height+(margin[1]*2)+(padding[1]*2));
   d3.select('svg')
@@ -150,7 +158,8 @@ textarea.addEventListener('keyup', () => {
         texts.push({
           text: options.write,
           bgColor:options.bgColor,
-          space:spacerList[i].length - 1
+          space:spacerList[i].length - 1,
+          s_padding:options.s_padding
         });
       }
       drawFigure();
